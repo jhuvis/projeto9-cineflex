@@ -26,7 +26,7 @@ export default function Sessoes() {
             <p>Selecione o horário</p>
         </Container>
         <Dias>
-            {sessoes.map((dia) => <Sessao                         
+            {sessoes.map((dia, index) => <Sessao key={index}                        
                                 semana = {dia.weekday}
                                 data = {dia.date}
                                 horarios = {dia.showtimes}
@@ -48,6 +48,7 @@ const Dias = styled.div`
     justify-content: center;
     flex-direction: column;
     margin-bottom: 150px;
+    margin-left: 20px;
 `;
 
 const Box = styled.div`
