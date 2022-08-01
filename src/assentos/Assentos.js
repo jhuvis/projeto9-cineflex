@@ -21,16 +21,24 @@ export default function Assentos() {
   let navigate = useNavigate();
 
   useEffect(() => {
+    let isApiSubscribed = true;
     const requisicao = axios.get(
       `https://mock-api.driven.com.br/api/v7/cineflex/showtimes/${idSessao}/seats`
     );
 
     requisicao.then((res) => {
+      if (isApiSubscribed) 
+      {
         setDate(res.data.day);
         setName(res.data.name);
         setFilme(res.data.movie);
         setSeats(res.data.seats);
+      }
     });
+    return () => 
+    {
+      isApiSubscribed = false;
+    };
   }, []);
 
   function reserva(id, name)
@@ -89,6 +97,9 @@ export default function Assentos() {
 
     setCpf("");
     setNome("");
+    const novo = [];
+    reservas = [...novo];
+    cadeiras = [...novo];
 
   });
   }
