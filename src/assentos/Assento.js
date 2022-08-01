@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 export default function Assento(props)
 {
-    const {name, isAvailable, reserva, key} = {...props};
+    const {name, isAvailable, reserva, id} = {...props};
 
     const [cor, setCor] = useState(() => isAvailable ? "#C3CFD9" : "#FBE192");
     
@@ -14,13 +14,17 @@ export default function Assento(props)
             if(cor === "#8DD7CF")
             {
                 setCor("#C3CFD9");
-                reserva(name);
+                reserva(id, name);
             }
             else
             {
                 setCor("#8DD7CF");
-                reserva(name);
+                reserva(id, name);
             }
+        }
+        else
+        {
+            alert("Esse assento não está disponível");
         }
     }
 

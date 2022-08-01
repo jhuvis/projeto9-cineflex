@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import styled from 'styled-components';
 import verde from "./verde.png";
@@ -7,13 +7,18 @@ import laranja from "./amarelo.png";
 import cinza from "./cinza.png";
 import Assento from "./Assento";
 
+let reservas = [];
+let cadeiras = [];
+
 export default function Assentos() {
   const {idSessao} = useParams();
   const [date, setDate] = useState({});
   const [name, setName] = useState("");
   const [filme, setFilme] = useState({});
-  const [seats, setSeats] = useState([]);2
-  const reservas = [];
+  const [seats, setSeats] = useState([]);
+  var [nome, setNome] = useState("");
+  var [cpf, setCpf] = useState("");
+  let navigate = useNavigate();
 
   useEffect(() => {
     const requisicao = axios.get(
@@ -28,13 +33,13 @@ export default function Assentos() {
     });
   }, []);
 
-  function reserva(name)
+  function reserva(id, name)
   {
     let tem = false;
     let i = 0;
     for(i = 0; i < reservas.length; i++)
     {
-      if(reservas[i] === name)
+      if(reservas[i] === id)
       {
         tem = true;
         break;
@@ -42,15 +47,50 @@ export default function Assentos() {
     }
     if(tem === false)
     {
-      reservas.push(name);
-      console.log(reservas);
+      reservas.push(id);
+      cadeiras.push(name);
     }
     else
     {
       reservas.splice(i, 1);
-      console.log(reservas);
+      cadeiras.splice(i, 1);
     }   
     
+  }
+
+  function finalizar(event)
+  {
+    event.preventDefault();
+
+    if (reservas.length === 0) 
+    {
+      return alert("assento vazios");
+    }
+
+    const requisicao = axios.post("https://mock-api.driven.com.br/api/v7/cineflex/seats/book-many", 
+    {
+			ids: reservas,
+	    name: nome,
+	    cpf: cpf,
+		});
+
+    requisicao.then(() => {navigate("/sucesso",
+    {
+      replace: false,
+      state: {
+      title : filme.title,
+      weekday : date.weekday,
+      hora : name,
+      assentos : cadeiras,
+      nome : nome,
+      cpf : cpf,
+    },
+    })
+
+    setCpf("");
+    setNome("");
+
+  });
   }
 
   return (
@@ -65,6 +105,7 @@ export default function Assentos() {
                                     name = {seat.name}
                                     isAvailable = {seat.isAvailable} 
                                     reserva = {reserva}
+                                    id = {seat.id}
                                     key = {index}  
                             />)}
         </Todos>
@@ -83,6 +124,37 @@ export default function Assentos() {
           </div>
         </Indice>
 
+        <Form>
+        <form onSubmit={finalizar}>
+        <label htmlFor="nome">Nome do comprador: </label>
+         <div><Input
+            type="text"
+            id="nome"
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
+            required
+          /></div> 
+          <label htmlFor="cpf">CPF do comprador: </label>
+          <div><Input
+            type="text"
+            id="cpf"
+            value={cpf}
+            pattern="\d{3}\.\d{3}\.\d{3}-\d{2}"
+            onChange={(e) => setCpf(e.target.value)}
+            required
+          /></div> 
+          <Buttom>
+          
+          <button type="submit">
+              Reservar assento(s)
+              
+          </button>
+          
+          
+          </Buttom>
+        </form>
+        </Form>
+
         <Bottom>
                 <Box>
                     <img src={filme.posterURL}></img>
@@ -94,6 +166,49 @@ export default function Assentos() {
     </>
   );
 }
+
+const Form = styled.div`
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-direction: column;
+    margin-bottom: 200px;
+    div{
+      margin-bottom: 10px;
+    }
+
+`;
+
+const Buttom = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 15px;
+
+    button{
+      background: #E8833A;
+      border-radius: 3px;
+      border: none;
+      width: 225px;
+      height: 42px;
+
+      font-family: 'Roboto';
+      font-style: normal;
+      font-weight: 400;
+      font-size: 18px;
+      line-height: 21px;
+      color: #FFFFFF;
+    }
+
+`;
+
+const Input = styled.input`
+width: 327px;
+height: 51px;
+background: #FFFFFF;
+border: 1px solid #D5D5D5;
+border-radius: 3px;
+`;
 
 const Box = styled.div`
     width: 64px;
@@ -127,6 +242,7 @@ const Bottom = styled.div`
     bottom: 0px;
     background: #DFE6ED;
     border: 1px solid #9EADBA;
+    
 	
 	div p {
         display: flex;
